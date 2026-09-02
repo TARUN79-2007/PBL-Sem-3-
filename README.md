@@ -4,7 +4,7 @@ The main goal of our project is to help people build discipline, develop positiv
 The primary goal is to build a fully functional zero-dependency C/C++ console application that
 boosts habit adherence through interactive gamification.
 
-Phase 1:Define core requirements and design OOP class hierarchies (User, Activity).
+Phase 1: Define core requirements and design OOP class hierarchies (User, Activity).
 Phase 2: Implement C/C++ data structures, including dynamic memory allocation and BSTs for leaderboards.
 Phase 3: Develop the gamification engine (streak logic, heart penalties, XP calculation).
 Phase 4: Build the interactive CLI loop and apply ANSI color formatting.
