@@ -1,0 +1,353 @@
+% Exact LaTeX recreation of the supplied Phase-1.pdf
+% Compile with pdfLaTeX. Place member pictures in the same folder if required.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,left=2.0cm,right=2.0cm,top=1.55cm,bottom=1.55cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{setspace}
+\usepackage{graphicx}
+
+% -------------------------------------------------
+% COLOURS
+% -------------------------------------------------
+\definecolor{TitleBlue}{RGB}{61,103,154}
+
+% -------------------------------------------------
+% GENERAL SETTINGS
+% -------------------------------------------------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\renewcommand{\arraystretch}{1.0}
+
+% The supplied document uses a clean sans-serif heading style
+% and italic serif-style explanatory text.
+\newcommand{\blueheading}[1]{%
+    {\sffamily\color{TitleBlue}\fontsize{15}{18}\selectfont #1}%
+}
+
+\newcommand{\bluebigheading}[1]{%
+    {\sffamily\bfseries\color{TitleBlue}\fontsize{16}{19}\selectfont #1}%
+}
+
+\newcommand{\instruction}[1]{%
+    {\itshape\fontsize{10.5}{12.5}\selectfont #1}%
+}
+
+\newcommand{\answerbox}[2][3.0cm]{%
+    \vspace{2pt}
+    \noindent
+    \fbox{%
+        \begin{minipage}[t][#1][t]{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}
+            \vspace{1mm}
+            \itshape #2
+        \end{minipage}
+    }
+}
+
+% -------------------------------------------------
+% HEADER / FOOTER
+% -------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancyhead[L]{%
+    \sffamily\bfseries\itshape\fontsize{10.5}{12}\selectfont
+    Btech CSE (AI and ML)
+}
+\fancyhead[R]{%
+    \sffamily\bfseries\fontsize{10.5}{12}\selectfont
+    PROJECT PROPOSAL
+}
+\fancyfoot[R]{%
+    \itshape\fontsize{10}{12}\selectfont
+    Page \thepage
+}
+\setlength{\headheight}{14pt}
+\setlength{\headsep}{23pt}
+\setlength{\footskip}{24pt}
+
+% -------------------------------------------------
+% PAGE 1
+% -------------------------------------------------
+\begin{document}
+
+\vspace*{4mm}
+
+\bluebigheading{PROJECT AND TEAM INFORMATION}
+
+\vspace{13mm}
+
+\blueheading{Project Title}
+
+\vspace{1mm}
+
+\instruction{}
+
+\answerbox[1.0cm]{\textbf{\textit{HABITQUEST}}: Gamified Habit Tracker }
+
+\vspace{13mm}
+
+\blueheading{Student / Team Information}
+
+\vspace{2mm}
+
+% Team information table
+% Compact 4-member layout so all members remain on Page 1.
+\noindent
+\begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{0.69\textwidth}|>{\RaggedRight\arraybackslash}X|}
+\hline
+\begin{minipage}[t]{\linewidth}
+\vspace{1.5mm}
+\textit{Team Name:}\\[-1mm]
+\textit{Team ID:}
+\vspace{1.5mm}
+\end{minipage}
+&
+\begin{minipage}[t]{\linewidth}
+\vspace{1.5mm}
+\textbf{\textit{Alpha\\DSCPP-III-2026-T382}}
+\vspace{1.5mm}
+\end{minipage}
+\\
+\hline
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 1 (Team Lead)}\\[-1mm]
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textit{Semwal, Ayush -- 25101210653}\\
+\resizebox{\linewidth}{!}{\textit{AYUSHSEMWALSEMWAL.25101210653@gehu.ac.in}}
+
+\vspace{2mm}
+\includegraphics[width=3.0cm,height=1.5cm,keepaspectratio]{ayushphoto.jpg}
+\end{minipage}
+\\
+\hline
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 2}\\[-1mm]
+
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textit{Pratap Singh , Tarun -- 25101210657}\\
+\resizebox{\linewidth}{!}{\textit{TARUNPRATAPSINGH.25101210657@gehu.ac.in}}
+
+\vspace{2mm}
+\includegraphics[width=3.0cm,height=1.5cm,keepaspectratio]{tarunphoto.jpg}
+\end{minipage}
+\\
+\hline
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 3}\\[-1mm]
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textit{ Rawat, Suryansh -- 25101210654}\\
+\resizebox{\linewidth}{!}{\textit{SURYANSHRAWAT.25101210654@gehu.ac.in}}
+
+\vspace{2mm}
+\includegraphics[width=3.0cm,height=1.5cm,keepaspectratio]{suryanshphoto.png}
+\end{minipage}
+\\
+\hline
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 4}\\[-1mm]
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textit{
+Bisht, Priyanshu -- 25101281855}\\
+\resizebox{\linewidth}{!}{\textit{PRIYANSHUBISHT.25101281855@gehu.ac.in}}
+
+\vspace{2mm}
+ \includegraphics[width=3.0cm,height=1.5cm,keepaspectratio]{priyanshu.jpg}
+\end{minipage}
+\\
+\hline
+\end{tabularx}
+
+\newpage
+
+% -------------------------------------------------
+% PAGE 2
+% -------------------------------------------------
+
+\bluebigheading{PROPOSAL DESCRIPTION (10 pts)}
+
+\vspace{12mm}
+
+\blueheading{Motivation (1 pt)}
+
+\vspace{1mm}
+
+
+\answerbox[3.3cm]{The main problem that we are aiming to solve in this project is the difficulty The of maintaining habits consistently over time.the traditional habit trackers often works only as simple checklists and may not provide motivation. Our gamified habit tracker addresses this issue through a reward based system where users earns XP for completing daily habits,receive streak bonus and can unlock levels and achievement badges, making habit tracking more engaging by providing a continuous feedback and a sense of progress. Our system will encourage users to stay consistent and improve their habits through gamification, rewards and progress tracking. }
+
+\vspace{12mm}
+
+\blueheading{State of the Art / Current solution (1 pt)}
+
+\vspace{1mm}
+
+
+\answerbox[2.75cm]{Most of the gamified habit trackers take heavy resources GUI or mobile applications, but this project replaces those bloated graphical interface with a fast, terminal-native CLI application. Instead of heavy libraries it utilizes standard input/output streams and ANSI escape sequencess to provide coloured visual feedback, streak counter and dynamic health bars within the command line, hence making it light weight/fast but at the same time more interactive and appealing to the user.  }
+
+\vspace{12mm}
+
+\blueheading{Project Goals and Milestones (2 pts)}
+
+\vspace{1mm}
+
+
+\answerbox[8.15cm]{The main goal of our project is to help people build discipline, develop positive habits, and become more productive through a simple and engaging gamified habit tracker. We aim to motivate users through XP, rewards, streaks, levels, and achievements. Initially the milestones include designing the system, applying habit tracking and reward logic, developing the CLI interface, and testing core features. Further milestones include adding analytics, improving gamification, optimizing performance, and managing user testing. In the long term, we aim to scale the project into a widely accessible platform that can help people build discipline and an active lifestyle on a large scale. The primary goal is to build a fully functional zero-dependency C/C++ console application that keeps you on track through interactive gamification.
+\\
+\\The main steps/approach to designing the project is as follow: \\\textbf{\textit{1:}} Define core requirements and design OOPs class hierarchies .\\\textit{\textbf{2:}} Implement C/C++ data structures, including dynamic memory allocation and BSTs for leaderboards.\\\textbf{\textit{3: }}Develop the gamification engine (streak logic, heart penalties, XP calculation). \\\textbf{\textit{4:}} Build the interactive CLI loop and apply ANSI color formatting. \\\textbf{\textit{5:}} Integrate local flat-file serialization and conduct memory leak testing.}
+
+\newpage 
+\vspace{12mm}
+
+\blueheading{Project Approach (3 pts)}
+
+\vspace{1mm}
+
+
+\answerbox[5.7cm]{We plan to make this Habit Tracker as a simple system that will help users stay consistent with their daily habits and routines. The user will be able to create habits, list them, mark them as completed and keep track of their progress through a command-line interface.
+
+\\To make the tracker more engaging we will add a gamification system where users will earn XP for completing habits, maintain streaks, level up and unlock achievement badges. Streaks will also provide extra XP so that users have more motivation to stay consistent. A heart/health bar feature will add another layer of challenge when habits are missed.
+
+\\All important information such as habits, XP, streaks, levels and achievements will be stored locally using .dat files, so the user’s progress remains available after closing the program.
+
+\\The system will also display coloured alerts and simple statistics in the terminal to help users understand their progress in an easy and better way. We will use C++, OOP concepts and data structures to keep the project organized and make it easier to improve or expand in the future.
+}
+
+
+% -------------------------------------------------
+% PAGE 3
+% -------------------------------------------------
+\vspace{12mm} 
+
+\blueheading{System Architecture (High Level Diagram)(2 pts)}
+
+\vspace{1mm}
+
+
+\answerbox[4.0cm]{{\textit{\textbf{Flow chart of the System Architecture :}}}
+\usetikzlibrary{positioning,arrows.meta}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=4mm and 4mm,
+    box/.style={
+        draw,
+        rounded corners=2pt,
+        align=center,
+        text width=2.45cm,
+        minimum height=0.85cm,
+        inner sep=3pt,
+        font=\scriptsize\sffamily
+    },
+    arrow/.style={
+        -{Latex[length=1.5mm]},
+        semithick
+    }
+]
+
+\node[box] (input) {
+    \textbf{Input Layer}\\
+    CLI Parser\\
+    Habit Logs\\
+    Menu Navigation
+};
+
+\node[box, right=of input] (controller) {
+    \textbf{Activity Controller}\\
+    OOP Classes\\
+    Timestamp Validation\\
+    Streak Reset
+};
+
+\node[box, right=of controller] (game) {
+    \textbf{Gamification Engine}\\
+    XP Calculation\\
+    Streak Multipliers\\
+    Heart/Health Deduction
+};
+
+\node[box, right=of game] (storage) {
+    \textbf{Storage Module}\\
+    Serialization\\
+    .dat Flat-Files\\
+    Data Persistence
+};
+
+\node[box, right=of storage] (output) {
+    \textbf{Output Layer}\\
+    Terminal Renderer\\
+    ANSI Alerts\\
+    ASCII Statistics
+};
+
+\draw[arrow] (input) -- (controller);
+\draw[arrow] (controller) -- (game);
+\draw[arrow] (game) -- (storage);
+\draw[arrow] (storage) -- (output);
+
+\end{tikzpicture}
+\end{center}}
+
+\vspace{12mm}
+
+\blueheading{Project Outcome / Deliverables (1 pts)}
+
+\vspace{1mm}
+
+\answerbox[3.7cm]{The project is intended to create a functional Gamified Habit Tracker designed to assist users in building discipline and improving their productivity. It will include a command-line interface which enables the creation and management of habits, the tracking of streaks, and the recording of activities. The programme will have XP rewards, bonuses for streaks, level-ups, achievements, and a health or heart mechanism as a means of motivating the users. User data will be saved locally in .dat files for each session. The application will also provide ANSI coloured alerts and formatted terminal statistics, together with the data structures, the OOPs modules, the project documentation, and the testing results.
+}
+
+\vspace{12mm}
+
+\blueheading{Assumptions}
+
+\vspace{6mm}
+
+
+\answerbox[2.65cm]{It is assumed that the target users are operating on a terminal emulator that can support standard ANSI escape sequences for colour rendering. It is also assumed that the application will have the necessary read/write file permissions to generate and reform the \verb|.dat| storage files. }
+\newpage
+\vspace{12mm}
+
+\blueheading{References}
+
+\vspace{1mm}
+
+\answerbox[2.65cm]{1: The_C++_Programming_Language_4th_Edition-Bjarne_Stroustrup\\ 
+\href{https://share.google/U7mQiVYttYvcxJGBV}
+\\
+\\2: Related research paper of habit tracker 
+\\\href{https://rjwave.org/jaafr/viewpaperforall.php?paper=JAAFR2603211}{}{}}
+
+\end{document}
+
