@@ -1,7 +1,7 @@
 #include "Database.h"
 #include <fstream>
 #include <iostream>
-
+#include <limits>
 using namespace std;
 
 // ==========================================
@@ -84,12 +84,21 @@ bool Database::loadHabits(vector<Habit*>& habits, const string& filepath) {
         bool status;
         string name;
 
-        inFile >> typeId;
-        inFile >> id;
-        inFile.ignore(); 
-        getline(inFile, name);
-        inFile >> baseXP;
-        inFile >> status;
+        if (!(inFile >> typeId >> id)) {
+    return false;
+}
+
+inFile.ignore(
+    numeric_limits<streamsize>::max(), '\n'
+);
+
+if (!getline(inFile, name)) {
+    return false;
+}
+
+if (!(inFile >> baseXP >> status)) {
+    return false;
+}
 
         // Reconstruct the correct derived object based on the typeId
         Habit* newHabit = nullptr;
