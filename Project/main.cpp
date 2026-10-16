@@ -263,7 +263,7 @@ int main() {
     for(Habit* h : activeHabits) {
         delete h;
     }
-    activeHabits.clear();
+    activeHabits.clear(); // Active Habits
 
     return 0;
 }
