@@ -20,7 +20,7 @@ void GamificationEngine::awardXP(User& u, int baseXP) {
     cout << YELLOW << "+" << totalEarned << " XP " << RESET;
     cout << "(Base: " << baseXP << " | Streak Bonus: " << streakBonus << ")\n";
     
-    Sleep(800); // Replaced std::this_thread
+    Sleep(800); // Replaced std::this_thread;
 
     // 4. Check if they hit the threshold for a new level
     checkLevelUp(u);
