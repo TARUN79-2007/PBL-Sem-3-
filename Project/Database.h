@@ -8,7 +8,7 @@
 
 class Database {
 public:
-    // User State Persistence
+    // "User State Persistence"
     static bool saveUserState(const User& u, const std::string& filepath = "user_profile.dat");
     static bool loadUserState(User& u, const std::string& filepath = "user_profile.dat");
 

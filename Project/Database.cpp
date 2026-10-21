@@ -4,9 +4,8 @@
 #include <limits>
 using namespace std;
 
-// ==========================================
+
 // USER STATE SERIALIZATION
-// ==========================================
 bool Database::saveUserState(const User& u, const string& filepath) {
     ofstream outFile(filepath);
     if (!outFile.is_open()) return false;
@@ -40,9 +39,7 @@ bool Database::loadUserState(User& u, const string& filepath) {
     return true;
 }
 
-// ==========================================
 // HABIT SERIALIZATION (Polymorphic RTTI)
-// ==========================================
 bool Database::saveHabits(const vector<Habit*>& habits, const string& filepath) {
     ofstream outFile(filepath);
     if (!outFile.is_open()) return false;
