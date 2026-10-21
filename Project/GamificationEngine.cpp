@@ -17,7 +17,7 @@ void GamificationEngine::awardXP(User& u, int baseXP) {
 
     // 3. UI Feedback
     cout << GREEN << "\nTask Completed! " << RESET;
-    cout << YELLOW << "+" << totalEarned << " XP " << RESET;
+    cout << GOLD << "+" << totalEarned << " XP " << RESET;
     cout << "(Base: " << baseXP << " | Streak Bonus: " << streakBonus << ")\n";
     
     Sleep(800); // Replaced std::this_thread;
@@ -36,7 +36,7 @@ void GamificationEngine::checkLevelUp(User& u) {
         // Level Up Animation
         clearScreen();
         cout << CYAN << "========================================\n" << RESET;
-        cout << YELLOW << "           LEVEL UP! \n" << RESET;
+        cout << GOLD << "           LEVEL UP! \n" << RESET;
         cout << CYAN << "========================================\n" << RESET;
         cout << GREEN << u.getUsername() << " is now Level " << u.getLevel() << "!\n" << RESET;
         cout << "You are getting stronger. Keep up the consistency!\n\n";
@@ -67,7 +67,7 @@ void GamificationEngine::evaluatePenalties(User& u, int missedDays) {
         u.resetStreak();
         // Give them back basic hearts so they aren't permanently stuck at 0
         u.restoreHearts(); 
-        cout << CYAN << "The system has mercifully restored 5 hearts. Try again.\n" << RESET;
+        cout << LAVENDER << "The system has mercifully restored 5 hearts. Try again.\n" << RESET;
     } else {
         cout << YELLOW << "Your streak of " << u.getStreak() << " is hanging by a thread...\n" << RESET;
     }
