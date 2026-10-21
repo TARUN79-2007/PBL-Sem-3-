@@ -97,7 +97,7 @@ void SliderHabit::display() const {
 
 bool SliderHabit::logCompletion() {
     if (isCompleted) {
-        cout << YELLOW << "Target already reached for today!\n" << RESET;
+        cout << GOLD << "Target already reached for today!\n" << RESET;
         return false;
     }
 
@@ -143,7 +143,7 @@ void TimerHabit::display() const {
 
 bool TimerHabit::logCompletion() {
     if (isCompleted) {
-        cout << YELLOW << "You already completed this focus session today!\n" << RESET;
+        cout << GOLD << "You already completed this focus session today!\n" << RESET;
         return false;
     }
 
