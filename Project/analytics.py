@@ -37,6 +37,22 @@ def main():
         ):
             df = generate_dummy_data()
 
+    required_columns = [
+        'Date',
+        'XP_Earned',
+        'Tasks_Completed',
+        'Tasks_Missed'
+    ]
+
+    missing_columns = [
+        col for col in required_columns
+            if col not in df.columns
+    ]
+
+    if missing_columns:
+        print(f"Invalid tracker data. Missing columns: {missing_columns}")
+        return
+
     # Set up the Matplotlib Figure with 2 subplots
     plt.style.use('dark_background')
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
