@@ -20,6 +20,8 @@ def generate_dummy_data():
     return df
 
 def main():
+    def main():
+    """Load tracker data and display the HabitQuest analytics dashboard."""
     print("Initializing Visual Analytics Engine...")
     
     # FIX: Check if the file exists AND if it has actual data in it (> 0 bytes)
