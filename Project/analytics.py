@@ -30,8 +30,12 @@ def main():
     else:
         try:
             df = pd.read_csv(CSV_FILE)
-        except pd.errors.EmptyDataError:
-            # Fallback just in case the file gets corrupted later
+        except (
+            pd.errors.EmptyDataError,
+            pd.errors.ParserError,
+            OSError,
+            UnicodeDecodeError
+        ):
             df = generate_dummy_data()
 
     # Set up the Matplotlib Figure with 2 subplots
