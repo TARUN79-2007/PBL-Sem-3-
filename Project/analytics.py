@@ -48,7 +48,9 @@ def main():
     ax1.set_title('7-Day XP Progression', fontsize=14, color='white')
     ax1.set_xlabel('Date')
     ax1.set_ylabel('XP Earned')
-    ax1.tick_params(axis='x', rotation=45)
+    ax1.tick_params(axis='x', labelrotation=45)
+    for label in ax1.get_xticklabels():
+    label.set_ha('right')
     ax1.grid(color='#333333', linestyle='--', alpha=0.7)
 
     # Chart 2: Task Completion Ratio (Pie Chart)
