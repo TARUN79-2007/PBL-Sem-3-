@@ -67,7 +67,7 @@ def main():
     ax2.set_title('Overall Task Success Rate', fontsize=14, color='white')
 
     # Adjust layout and display
-    plt.tight_layout()
+    fig.tight_layout(pad=2.0)
     plt.show()
 
 if __name__ == "__main__":
