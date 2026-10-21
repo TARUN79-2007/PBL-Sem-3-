@@ -20,7 +20,6 @@ def generate_dummy_data():
     return df
 
 def main():
-    def main():
     """Load tracker data and display the HabitQuest analytics dashboard."""
     print("Initializing Visual Analytics Engine...")
     
