@@ -19,30 +19,33 @@ DWORD WINAPI LiveTimerThread(LPVOID lpParam) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD coord;
     
-    while (totalSeconds > 0) {
-        // Jump to the top right corner (X: 50, Y: 1)
-        coord.X = 50; coord.Y = 1;
-        SetConsoleCursorPosition(hConsole, coord);
-        
-        cout << MAGENTA << "[TIMER: " << data->taskName << " - " 
-             << totalSeconds / 60 << "m " << (totalSeconds % 60) << "s]   " << RESET;
-        
-        Sleep(1000);
-        totalSeconds--;
-    }
+   for (; totalSeconds > 0; totalSeconds--) {
+    // Jump to the top right corner (X: 50, Y: 1)
+    coord.X = 50;
+    coord.Y = 1;
+    SetConsoleCursorPosition(hConsole, coord);
+
+    cout << MAGENTA << "[TIMER: " << data->taskName << " - " 
+         << totalSeconds / 60 << "m " << (totalSeconds % 60) << "s]   " << RESET;
+
+    Sleep(1000);
+}
+
+
 
     // Timer finished message
-    coord.X = 50; coord.Y = 1;
+    coord.X = 50; 
+    coord.Y = 1;
     SetConsoleCursorPosition(hConsole, coord);
     cout << GREEN << "[TIMER: " << data->taskName << " COMPLETE!]          " << RESET;
     
-    delete data; // Prevent memory leaks
+    delete data; 
     return 0;
 }
 
-// ==========================================
+
 // BASE CLASS: Habit Implementation
-// ==========================================
+
 Habit::Habit(int _id, string _name, int _baseXP) 
     : id(_id), name(_name), baseXP(_baseXP), isCompleted(false) {}
 
