@@ -55,9 +55,9 @@ bool Habit::getStatus() const { return isCompleted; }
 int Habit::getBaseXP() const { return baseXP; }
 
 
-// ==========================================
+
 // DERIVED CLASS 1: BinaryHabit (Yes/No)
-// ==========================================
+
 BinaryHabit::BinaryHabit(int _id, string _name, int _baseXP)
     : Habit(_id, _name, _baseXP) {}
 
@@ -81,9 +81,9 @@ bool BinaryHabit::logCompletion() {
 }
 
 
-// ==========================================
+
 // DERIVED CLASS 2: SliderHabit (Quantity)
-// ==========================================
+
 SliderHabit::SliderHabit(int _id, string _name, int _baseXP, int _targetAmount, string _unit)
     : Habit(_id, _name, _baseXP), currentAmount(0), targetAmount(_targetAmount), unit(_unit) {}
 
@@ -127,9 +127,9 @@ bool SliderHabit::logCompletion() {
         return false; // Not fully complete yet, no base XP awarded yet
     }
 }
-// ==========================================
+
 // DERIVED CLASS 3: TimerHabit (Duration)
-// ==========================================
+
 TimerHabit::TimerHabit(int _id, string _name, int _baseXP, int _targetMinutes)
     : Habit(_id, _name, _baseXP), targetMinutes(_targetMinutes) {}
 
@@ -152,18 +152,21 @@ bool TimerHabit::logCompletion() {
     cin >> choice;
     
     // Clear the input buffer so it doesn't mess up the menu later
-    while(cin.get() != '\n'); 
+   for (; cin.get() != '\n'; ) {}
 
-    if (choice == 'y' || choice == 'Y') {
-        cout << CYAN << "\nTimer launched! You can keep using the menu.\n" << RESET;
-        
-        TimerData* tData = new TimerData{targetMinutes, name};
-        CreateThread(NULL, 0, LiveTimerThread, tData, 0, NULL);
-        
-        isCompleted = true; 
-        return true; 
-    } else {
-        cout << YELLOW << "Timer cancelled.\n" << RESET;
-        return false;
-    }
+if (choice == 'Y' || choice == 'y') 
+{
+    cout << CYAN << "\nTimer launched! You can keep using the menu.\n" << RESET;
+
+    TimerData* tData = new TimerData{targetMinutes, name};
+    CreateThread(NULL, 0, LiveTimerThread, tData, 0, NULL);
+
+    isCompleted = true; 
+    return true; 
+} 
+else 
+{
+    cout << YELLOW << "Timer cancelled.\n" << RESET;
+    return false;
+}
 }
