@@ -1,19 +1,54 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <limits>
+#include <ctime>
 #include <windows.h>
 #include <conio.h>
 
 #include "Utils.h"
 #include "User.h"
-#include "GamificationEngine.h"
 #include "Habit.h"
 #include "Database.h"
+#include "GamificationEngine.h"
 #include "Leaderboard.h"
 
 using namespace std;
 
-// --- UI Helper Functions ---
+// --- TIME & UI HELPERS ---
+string currentDate() {
+    time_t t = time(nullptr);
+    tm* p = localtime(&t);
+    char b[16];
+    strftime(b, sizeof(b), "%Y-%m-%d", p);
+    return b;
+}
+
+void waitEnter() {
+    cout << "\nPress Enter to return...";
+    string s;
+    getline(cin, s);
+}
+
+string readPassword() {
+    string password;
+    int ch;
+    while ((ch = _getch()) != 13) {
+        if (ch == 8) {
+            if (!password.empty()) {
+                password.pop_back();
+                cout << "\b \b";
+            }
+        } else if (ch >= 32 && ch <= 126) {
+            password.push_back(static_cast<char>(ch));
+            cout << '*';
+        }
+    }
+    cout << '\n';
+    return password;
+}
+
 void moveCursor(int x, int y) {
     COORD coord;
     coord.X = x;
@@ -28,29 +63,38 @@ void setCursorVisibility(bool visible) {
     info.bVisible = visible ? TRUE : FALSE;
     SetConsoleCursorInfo(consoleHandle, &info);
 }
+
 // --- BACKGROUND THREADS ---
+struct AnalyticsData {
+    string filepath;
+    string username;
+};
+
 DWORD WINAPI LaunchAnalytics(LPVOID lpParam) {
-    system("python analytics.py");
+    AnalyticsData* data = (AnalyticsData*)lpParam;
+    string command = "python analytics.py \"" + data->filepath + "\" \"" + data->username + "\"";
+    system(command.c_str());
+    delete data; 
     return 0;
 }
+
 // --- REUSABLE INTERACTIVE MENU ENGINE ---
 int displayInteractiveMenu(const string& title, const vector<string>& options) {
     int selectedIndex = 0;
     bool isChoosing = true;
     
-    setCursorVisibility(false); // Hide cursor during navigation
-    clearScreen();              // Clear the screen once before drawing the menu
+    setCursorVisibility(false); 
+    clearScreen();              
 
     while (isChoosing) {
-        moveCursor(0, 0); // Lock cursor to top-left to prevent flicker
-
+        moveCursor(0, 0); 
         cout << CYAN << "====================================================\n" << RESET;
         cout << GREEN << "  " << title << "  \n" << RESET;
         cout << CYAN << "====================================================\n\n" << RESET;
         
-        for (int i = 0; i < options.size(); ++i) {
+        // Properly cast size() to int to fix -Wsign-compare warnings
+        for (int i = 0; i < static_cast<int>(options.size()); ++i) {
             if (i == selectedIndex) {
-                // Cyan highlight for selection
                 cout << "\x1b[46;30m > " << options[i] << " \x1b[0m                                       \n";
             } else {
                 cout << "   " << options[i] << "                                         \n";
@@ -63,207 +107,252 @@ int displayInteractiveMenu(const string& title, const vector<string>& options) {
             key = _getch();
             if (key == 72) { // UP
                 selectedIndex--;
-                if (selectedIndex < 0) selectedIndex = options.size() - 1;
+                if (selectedIndex < 0) selectedIndex = static_cast<int>(options.size()) - 1;
             } else if (key == 80) { // DOWN
                 selectedIndex++;
-                if (selectedIndex >= options.size()) selectedIndex = 0;
+                if (selectedIndex >= static_cast<int>(options.size())) selectedIndex = 0;
             }
         } else if (key == 13) { // ENTER
             isChoosing = false;
         }
     }
-    setCursorVisibility(true); // Bring cursor back for normal inputs
+    setCursorVisibility(true); 
     clearScreen();
     return selectedIndex;
 }
 
-// Display the main UI Dashboard
-void displayDashboard(User& u, const vector<Habit*>& habits) {
-    cout << CYAN << "========================================\n" << RESET;
-    cout << YELLOW << "          HABITQUEST DASHBOARD\n" << RESET;
-    cout << CYAN << "========================================\n\n" << RESET;
-
-    cout << "User: " << GREEN << u.getUsername() << RESET << " | Level: " << YELLOW << u.getLevel() << RESET << "\n";
-    cout << "Streak: " << MAGENTA << u.getStreak() << " Days \xE2\x94\x82 " << RESET; 
-    
-    cout << "Health: " << RED;
-    for(int i = 0; i < 5; i++) {
-        if(i < u.getHearts()) cout << "<3 ";
-        else cout << "- ";
+bool readInt(const string& prompt, int& value) {
+    cout << prompt;
+    if (cin >> value && value > 0) {
+        clearInputBuffer();
+        return true;
     }
-    cout << RESET << "\n\n";
+    cin.clear();
+    clearInputBuffer();
+    cout << RED << "Enter a positive whole number.\n" << RESET;
+    return false;
+}
 
-    int nextLevel = u.getLevel() + 1;
-    int xpToNextLevel = (nextLevel - 1) * (nextLevel - 1) * 10; 
+void saveSession(User& user, vector<Habit*>& habits) {
+    Database::saveUserState(user);
+    Database::saveHabits(habits, user.getUsername());
+    int done = 0, missed = 0;
+    for (auto* h : habits) {
+        (h->getStatus() ? done : missed)++;
+    }
+    Database::appendAnalytics(user, done, missed);
+}
+
+// --- APPLICATION MODULES ---
+void dashboard(const User& u, const vector<Habit*>& hs) {
+    cout << CYAN << "=============== HABITQUEST DASHBOARD ===============\n" << RESET;
+    cout << "Player: " << GREEN << u.getUsername() << RESET << " | Level: " << YELLOW << u.getLevel() << RESET << " | XP: " << u.getXP() << "\n";
+    cout << "Streak: " << MAGENTA << u.getStreak() << " days" << RESET << " | Hearts: " << RED;
+    for (int i = 0; i < 5; ++i) cout << (i < u.getHearts() ? "<3 " : "- ");
+    cout << RESET << "\n\nToday's active quests:\n";
     
-    cout << "XP Progress (" << u.getXP() << " / " << xpToNextLevel << "):\n";
-    renderProgressBar(u.getXP(), xpToNextLevel, YELLOW);
+    if (hs.empty()) cout << "No habits yet. Add your first habit!\n";
+    for (const auto* h : hs) h->display();
     
-    cout << "\n" << CYAN << "--- Today's Active Quests ---\n" << RESET;
+    int threshold = u.getLevel() * u.getLevel() * 10;
+    cout << "\nXP Progress (" << u.getXP() << " / " << threshold << "):\n";
+    renderProgressBar(u.getXP(), threshold, YELLOW);
+}
+
+void addHabit(vector<Habit*>& hs, int& nextId) {
+    int type = displayInteractiveMenu("ADD A NEW HABIT", {"Yes/No Task", "Quantity Task", "Time-Based Task", "Cancel"});
+    if (type == 3) return;
     
-    if (habits.empty()) {
-        cout << "No habits yet. Go back to the menu and add one!\n";
+    cout << GREEN << "--- Add a New Habit ---\n" << RESET;
+    string name;
+    cout << "Habit name: ";
+    getline(cin, name);
+    if (name.empty()) { cout << RED << "Name cannot be empty.\n" << RESET; return; }
+    
+    if (type == 0) {
+        hs.push_back(new BinaryHabit(nextId++, name, 25));
+    } else if (type == 1) {
+        int target;
+        if (!readInt("Target amount: ", target)) return;
+        string unit;
+        cout << "Unit (e.g., glasses, pages): ";
+        getline(cin, unit);
+        if (unit.empty()) unit = "units";
+        hs.push_back(new SliderHabit(nextId++, name, 40, target, unit));
     } else {
-        for (const Habit* h : habits) {
-            h->display();
+        int mins;
+        if (!readInt("Target minutes: ", mins)) return;
+        hs.push_back(new TimerHabit(nextId++, name, 50, mins));
+    }
+    cout << GREEN << "Habit added successfully!\n" << RESET;
+}
+
+void logHabit(User& u, vector<Habit*>& hs) {
+    if (hs.empty()) { cout << "No habits to complete.\n"; return; }
+    
+    vector<string> opts;
+    for (auto* h : hs) opts.push_back(h->getName() + (h->getStatus() ? " [Done]" : ""));
+    opts.push_back("Cancel / Go Back");
+    
+    int i = displayInteractiveMenu("LOG HABIT COMPLETION", opts);
+    if (i >= static_cast<int>(hs.size())) return;
+    
+    cout << MAGENTA << "--- Log Completion ---\n" << RESET;
+    hs[i]->display();
+    cout << "\n";
+    if (hs[i]->logCompletion()) {
+        GamificationEngine::awardXP(u, hs[i]->getBaseXP());
+    }
+}
+
+void deleteHabit(vector<Habit*>& hs) {
+    if (hs.empty()) { cout << "No habits to delete.\n"; return; }
+    
+    vector<string> opts;
+    for (auto* h : hs) opts.push_back("DELETE: " + h->getName());
+    opts.push_back("Cancel / Go Back");
+    
+    int i = displayInteractiveMenu("DELETE A HABIT", opts);
+    if (i >= static_cast<int>(hs.size())) return;
+    
+    delete hs[i];
+    hs.erase(hs.begin() + i);
+    cout << RED << "Habit deleted.\n" << RESET;
+}
+
+void runPlayer(User& u) {
+    vector<Habit*> habits;
+    Database::loadHabits(habits, u.getUsername());
+    
+    string dateFile = Database::userDirectory(u.getUsername()) + "/last_login.dat", last;
+    ifstream d(dateFile);
+    d >> last;
+    d.close();
+    
+    string today = currentDate();
+    if (!last.empty() && last != today) {
+        for (Habit* h : habits) h->resetDaily();
+        cout << YELLOW << "New day detected. Daily habit progress has been reset.\n" << RESET;
+        Sleep(1500);
+    }
+    ofstream out(dateFile);
+    out << today;
+    out.close();
+    
+    int nextId = 1;
+    for (auto* h : habits) {
+        if (h->getId() >= nextId) nextId = h->getId() + 1;
+    }
+    
+    bool active = true;
+    while (active) {
+        int c = displayInteractiveMenu("HABITQUEST | " + u.getUsername(), {
+            "View Dashboard (Stats & Health)",
+            "Add a New Habit",
+            "Log Habit Completion (Earn XP!)",
+            "Delete a Habit",
+            "Global Leaderboard (Multiplayer)",
+            "Generate Visual Analytics (Python)",
+            "Save & Logout"
+        });
+        
+        switch (c) {
+            case 0: dashboard(u, habits); waitEnter(); break;
+            case 1: addHabit(habits, nextId); waitEnter(); break;
+            case 2: logHabit(u, habits); waitEnter(); break;
+            case 3: deleteHabit(habits); waitEnter(); break;
+            case 4: {
+                Database::saveUserState(u);
+                Leaderboard board;
+                board.display(Database::loadAllUsers());
+                waitEnter();
+                break;
+            }
+            case 5: {
+                cout << CYAN << "--- Visual Analytics ---\n" << RESET;
+                showSpinner("Exporting data and launching Python engine", 500);
+                
+                AnalyticsData* aData = new AnalyticsData{
+                    Database::userDirectory(u.getUsername()) + "/tracker_data.csv", 
+                    u.getUsername()
+                };
+                
+                CreateThread(NULL, 0, LaunchAnalytics, aData, 0, NULL);
+                cout << GREEN << "\nVisual Dashboard launched concurrently!\n" << RESET;
+                waitEnter();
+                break;
+            }
+            case 6: 
+                saveSession(u, habits);
+                cout << GREEN << "Progress saved. Logged out: " << u.getUsername() << "\n" << RESET;
+                active = false; 
+                Sleep(1000);
+                break;
         }
     }
-
-    cout << "\nPress Enter to return to the menu...";
-    cin.get();
+    for (Habit* h : habits) delete h;
 }
 
 int main() {
     setCursorVisibility(false);
-    clearScreen();
+    string status;
     
     typeText(string(CYAN) + "Initializing HABITQUEST System...\n" + RESET, 15);
+    showSpinner("Connecting to local databases", 400);
     
-    User player("Player1");
-    vector<Habit*> activeHabits;
-    Leaderboard lb;
-    
-    lb.addPlayer("IronCoder", 1450, 12);
-    lb.addPlayer("DebugNinja", 820, 9);
-    lb.addPlayer("SleepDeprived", 150, 3);
-    
-    showSpinner("Connecting to local .dat files", 600);
-    if (Database::loadUserState(player)) {
-        cout << GREEN << "User profile loaded successfully.\n" << RESET;
+    if (!Database::initialize(status)) {
+        cerr << RED << status << RESET << '\n';
+        return 1;
     }
-    if (Database::loadHabits(activeHabits)) {
-        cout << GREEN << "Habit list loaded successfully.\n" << RESET;
-    }
-    Sleep(800);
-
-    bool isRunning = true;
-    int habitCounter = activeHabits.size() + 1;
-
-    vector<string> mainMenuOptions = {
-        "View Dashboard (Stats & Health)",
-        "Add a New Habit",
-        "Log Habit Completion (Earn XP!)",
-        "View Global Leaderboard (BST)",
-        "Generate Visual Analytics (Python)",
-        "Save & Exit Application"
-    };
-
-    while (isRunning) {
-        // Use our new reusable menu engine!
-        int choice = displayInteractiveMenu("HABITQUEST: MAIN MENU", mainMenuOptions) + 1;
-
-        switch (choice) {
-            case 1:
-                showSpinner("Compiling Dashboard Stats", 400);
-                displayDashboard(player, activeHabits);
-                break;
-                
-            case 2: {
-                // Reusing the menu for selecting a habit type
-                vector<string> typeOptions = {
-                    "Yes/No Task (e.g., Read a book)",
-                    "Quantity Task (e.g., Drink 3000ml water)",
-                    "Time-Based Task (e.g., Meditate for 10 mins)",
-                    "Cancel / Go Back"
-                };
-                
-                int type = displayInteractiveMenu("ADD A NEW HABIT: SELECT TYPE", typeOptions);
-                
-                if (type == 3) break; // User selected "Cancel"
-                
-                string name;
-                cout << GREEN << "--- Add a New Habit ---\n" << RESET;
-                cout << "Enter Habit Name: ";
-                getline(cin, name);
-                
-                if (type == 0) { // Binary
-                    activeHabits.push_back(new BinaryHabit(habitCounter++, name, 25));
-                    cout << GREEN << "Habit added successfully!\n" << RESET;
-                } else if (type == 1) { // Slider
-                    int target;
-                    string unit;
-                    cout << "Target amount: ";
-                    cin >> target;
-                    cout << "Unit of measurement: ";
-                    cin >> unit;
-                    clearInputBuffer();
-                    activeHabits.push_back(new SliderHabit(habitCounter++, name, 40, target, unit));
-                    cout << GREEN << "Slider Habit added successfully!\n" << RESET;
-                } else if (type == 2) { // Timer
-                    int mins;
-                    cout << "Target minutes: ";
-                    cin >> mins;
-                    clearInputBuffer();
-                    activeHabits.push_back(new TimerHabit(habitCounter++, name, 50, mins));
-                    cout << GREEN << "Timer Habit added successfully!\n" << RESET;
-                }
-                Sleep(1000);
-                break;
+    
+    bool running = true;
+    while (running) {
+        int c = displayInteractiveMenu("WELCOME TO HABITQUEST", {
+            "Login",
+            "Register New Account",
+            "Set Password for Migrated 'Player' Account",
+            "Exit Game"
+        });
+        
+        if (c == 0) {
+            string name, pw, msg;
+            cout << GREEN << "--- LOGIN ---\n" << RESET;
+            cout << "Username: ";
+            getline(cin, name);
+            cout << "Password: ";
+            pw = readPassword();
+            if (Database::authenticate(name, pw, msg)) {
+                User u(name);
+                Database::loadUserState(u);
+                cout << GREEN << msg << RESET << '\n';
+                Sleep(800);
+                runPlayer(u);
+            } else {
+                cout << RED << msg << RESET << '\n';
+                waitEnter();
             }
-                
-            case 3: {
-                if(activeHabits.empty()) {
-                    cout << MAGENTA << "--- Log Completion ---\n" << RESET;
-                    cout << "No habits to complete. Add one first!\n";
-                    Sleep(1500);
-                    break;
-                }
-                
-                // Dynamically build a menu out of the active habits!
-                vector<string> habitOptions;
-                for (const Habit* h : activeHabits) {
-                    habitOptions.push_back(h->getName() + (h->getStatus() ? " (Done)" : ""));
-                }
-                habitOptions.push_back("Cancel / Go Back");
-
-                int selectedHabitIndex = displayInteractiveMenu("LOG COMPLETION: SELECT A HABIT", habitOptions);
-                
-                if (selectedHabitIndex == activeHabits.size()) break; // Cancelled
-                
-                Habit* targetHabit = activeHabits[selectedHabitIndex];
-                
-                cout << MAGENTA << "--- Log Completion ---\n" << RESET;
-                targetHabit->display();
-                cout << "\n";
-                
-                if (targetHabit->logCompletion()) {
-                    GamificationEngine::awardXP(player, targetHabit->getBaseXP());
-                }
-                
-                cout << "\nPress Enter to return...";
-                cin.get();
-                break;
-            }
-            
-            case 4:
-                lb.addPlayer(player.getUsername(), player.getXP(), player.getLevel());
-                lb.displayTopPlayers();
-                cout << "Press Enter to return...";
-                cin.get();
-                break;
-
-            case 5:
-                cout << CYAN << "--- Analytics ---\n" << RESET;
-                showSpinner("Exporting data and launching Python script", 1000);
-                system("python analytics.py");
-                cout << "\nPress Enter to return...";
-                cin.get();
-                break;
-
-            case 6:
-                showSpinner("Saving profile and serializing data", 1000);
-                Database::saveUserState(player);
-                Database::saveHabits(activeHabits);
-                typeText(string(GREEN) + "Exiting HABITQUEST. Stay disciplined, " + player.getUsername() + "!\n" + RESET);
-                isRunning = false;
-                break;
+        } else if (c == 1) {
+            string name, pw, msg;
+            cout << GREEN << "--- REGISTER ---\n" << RESET;
+            cout << "Choose username (3-20 letters/numbers/_/-): ";
+            getline(cin, name);
+            cout << "Choose password (minimum 8 characters): ";
+            pw = readPassword();
+            if (Database::registerAccount(name, pw, msg)) cout << GREEN << msg << RESET << '\n';
+            else cout << RED << msg << RESET << '\n';
+            waitEnter();
+        } else if (c == 2) {
+            string pw, msg;
+            cout << GREEN << "--- SECURE LEGACY ACCOUNT ---\n" << RESET;
+            cout << "New password for legacy Player account (min 8 chars): ";
+            pw = readPassword();
+            if (Database::resetLegacyPassword("Player", pw, msg)) cout << GREEN << msg << RESET << '\n';
+            else cout << RED << msg << RESET << '\n';
+            waitEnter();
+        } else {
+            running = false;
         }
     }
-    
-    for(Habit* h : activeHabits) {
-        delete h;
-    }
-    activeHabits.clear(); // Active Habits
-
+    cout << CYAN << "HabitQuest closed. Stay consistent!\n" << RESET;
     return 0;
 }
