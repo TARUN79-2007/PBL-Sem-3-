@@ -3,7 +3,6 @@
 
 #include <string>
 
-// --- ABSTRACT BASE CLASS ---
 class Habit {
 protected:
     int id;
@@ -12,53 +11,52 @@ protected:
     int baseXP;
 
 public:
-    Habit(int _id, std::string _name, int _baseXP);
-    virtual ~Habit() {} 
+    Habit(int i, std::string n, int xp);
+    virtual ~Habit() {}
 
-    // Getters
     int getId() const;
     std::string getName() const;
     bool getStatus() const;
     int getBaseXP() const;
+    void setStatus(bool s) { isCompleted = s; }
 
-    // Add this silent setter!
-    void setStatus(bool status) { isCompleted = status; }
-
-    // Pure virtual functions 
-    virtual void display() const = 0; 
-    virtual bool logCompletion() = 0; 
+    virtual void display() const = 0;
+    virtual bool logCompletion() = 0;
+    virtual void resetDaily() { isCompleted = false; }
 };
 
-// --- DERIVED CLASS 1: Binary Habit (Yes / No) ---
 class BinaryHabit : public Habit {
 public:
-    BinaryHabit(int _id, std::string _name, int _baseXP);
-    
+    BinaryHabit(int i, std::string n, int xp);
     void display() const override;
     bool logCompletion() override;
 };
 
-// --- DERIVED CLASS 2: Slider Habit (Quantity Based) ---
 class SliderHabit : public Habit {
 private:
     int currentAmount;
     int targetAmount;
-    std::string unit; // e.g., "ml", "pages", "pushups"
+    std::string unit;
 
 public:
-    SliderHabit(int _id, std::string _name, int _baseXP, int _targetAmount, std::string _unit);
-    
+    SliderHabit(int i, std::string n, int xp, int target, std::string u);
+    int getCurrent() const { return currentAmount; }
+    int getTarget() const { return targetAmount; }
+    std::string getUnit() const { return unit; }
+    void setCurrent(int n) { currentAmount = n; }
+
     void display() const override;
     bool logCompletion() override;
+    void resetDaily() override { isCompleted = false; currentAmount = 0; }
 };
-// --- DERIVED CLASS 3: Time-Based Habit ---
+
 class TimerHabit : public Habit {
 private:
     int targetMinutes;
 
 public:
-    TimerHabit(int _id, std::string _name, int _baseXP, int _targetMinutes);
-    
+    TimerHabit(int i, std::string n, int xp, int mins);
+    int getTargetMinutes() const { return targetMinutes; }
     void display() const override;
     bool logCompletion() override;
 };
